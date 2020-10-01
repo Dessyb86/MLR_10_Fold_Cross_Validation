@@ -1,0 +1,2 @@
+> cbl.cor <- cor(cbl[-c(6)])
+> sbl.cor <- cor(cbl[-c(6,9:12)])
