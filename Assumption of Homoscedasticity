@@ -1,0 +1,6 @@
+> cbl.mlr<-lm(cbl$so2~cbl$wind_speed+cbl$wind_direction+cbl$rel_humidity+cbl$air_pressure+cbl$clear_sky_global_solar_radiation)
+> summary(cbl.mlr)
+> plot(cbl.mlr)
+> sbl.mlr<-lm(sbl$so2~sbl$wind_speed+sbl$wind_direction+sbl$rel_humidity+sbl$air_pressure)
+> summary(sbl.mlr)
+> plot(sbl.mlr)
