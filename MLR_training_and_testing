@@ -1,0 +1,93 @@
+from sklearn import datasets
+
+from sklearn import linear_model
+
+from sklearn.model_selection import KFold
+
+from sklearn import metrics
+
+import pandas as pd
+
+import numpy as np
+
+import csv
+
+input_file = '/Users/Dessyb/Dropbox/Thesis_Final_Lap/final_compilation.csv' #name of the input file with the weather data
+
+data = pd.read_csv(input_file)
+
+pbl = data.dropna()
+
+cbl = pbl.loc[pbl['clear_sky_global_solar_radiation'] > 0]
+
+sbl = pbl.loc[pbl['clear_sky_global_solar_radiation'] == 0]
+
+cbl_predictors = cbl[['wind_speed','wind_direction', 'rel_humidity','air_pressure','clear_sky_global_solar_radiation']]
+
+cbl_predictand = cbl['so2']
+
+cbl_predictors.shape, cbl_predictand.shape
+
+kf = KFold(n_splits = 10, shuffle = True)
+
+mlr_reg = linear_model.LinearRegression()
+
+scores = []
+
+for i in range(10):
+    
+    result = next(kf.split(cbl_predictors), None)
+    
+    x_train = cbl_predictors.iloc[result[0]]
+    
+    x_test = cbl_predictors.iloc[result[1]]
+    
+    y_train = cbl_predictand.iloc[result[0]]
+
+    y_test = cbl_predictand.iloc[result[1]]
+    
+    model = mlr_reg.fit(x_train,y_train)
+    
+    predictions = mlr_reg.predict(x_test)
+    
+    scores.append(model.score(x_test,y_test))
+    
+print('Scores from each Iteration within the CBL: ', scores)
+
+print('Average K-Fold Score within the CBL:' , np.mean(scores))
+
+
+sbl_predictors = sbl[['wind_speed','wind_direction', 'rel_humidity','air_pressure']]
+
+sbl_predictand = sbl['so2']
+
+sbl_predictors.shape, sbl_predictand.shape
+
+kf = KFold(n_splits = 10, shuffle = True)
+
+mlr_reg = linear_model.LinearRegression()
+
+scores = []
+
+for i in range(10):
+    
+    result = next(kf.split(sbl_predictors), None)
+    
+    x_train = sbl_predictors.iloc[result[0]]
+    
+    x_test = sbl_predictors.iloc[result[1]]
+    
+    y_train = sbl_predictand.iloc[result[0]]
+
+    y_test = sbl_predictand.iloc[result[1]]
+    
+    model = mlr_reg.fit(x_train,y_train)
+    
+    predictions = mlr_reg.predict(x_test)
+    
+    scores.append(model.score(x_test,y_test))
+    
+print('Scores from each Iteration within the SBL: ', scores)
+
+print('Average K-Fold Score within the SBL:' , np.mean(scores))
+
