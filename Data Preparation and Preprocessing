@@ -1,0 +1,5 @@
+> final_compilation <- read.csv("~/Dropbox/Thesis_Final_Lap/final_compilation.csv")
+> final_compilation <- na.omit(final_compilation)
+> pbl<-final_compilation[-c(1:5,11)]
+> cbl<- subset(pbl,pbl$clear_sky_global_solar_radiation>0)
+> sbl<- subset(pbl,pbl$clear_sky_global_solar_radiation==0)
