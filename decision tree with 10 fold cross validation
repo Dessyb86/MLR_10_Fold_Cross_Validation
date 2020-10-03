@@ -1,0 +1,90 @@
+import pandas as pd
+
+import numpy as np
+
+from sklearn import tree
+
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+
+from sklearn.model_selection import train_test_split
+
+from sklearn.model_selection import KFold
+
+from sklearn.metrics import accuracy_score
+
+from matplotlib import pyplot as plt
+import seaborn as sns
+
+import graphviz
+import pydotplus
+import io
+
+from scipy import misc
+
+from matplotlib.pyplot import imread
+
+import csv
+
+def print_tree(tree,features,path):
+
+    f = io.StringIO()
+
+    export_graphviz(tree,out_file=f,feature_names=features)
+
+    pydotplus.graph_from_dot_data(f.getvalue()).write_png(path)
+
+    img = imread(path)
+
+    plt.rcParams["figure.figsize"]=(20,20)
+
+    plt.imshow(img)
+
+    plt.close()
+    
+input_file = '/Users/Dessyb/Dropbox/Thesis_Final_Lap/final_compilation.csv' #name of the input file with the weather data
+
+data = pd.read_csv(input_file)
+
+pbl = data.dropna()
+
+pbl = pbl.drop(columns=['year','month','day','hour','minute','date_time'])
+
+features=["wind_speed","wind_direction","air_temperature","rel_humidity","air_pressure","u_comp","v_comp","zenith_angle","albedo","clear_sky_global_solar_radiation","z_ic"]
+
+X = pbl[features]
+
+Y = pbl['pollution_level']
+
+kf = KFold(n_splits = 10, shuffle = True)
+
+c = DecisionTreeClassifier(min_samples_split=8)
+
+scores = []
+
+for i in range(10):
+
+    result = next(kf.split(X), None)
+
+    x_train = X.iloc[result[0]]
+
+    x_test = X.iloc[result[1]]
+
+    y_train = Y.iloc[result[0]]
+
+    y_test = Y.iloc[result[1]]
+
+    dt = c.fit(x_train,y_train)
+
+    predictions = dt.predict(x_test)
+
+    scores.append(dt.score(x_test,y_test))
+
+    filename ='decision_tree'+str(i+1)
+
+    print_tree(dt,features,filename)
+
+print('Scores from each Iteration within the PBL: ', scores)
+
+print('Average K-Fold Score within the PBL:' , np.mean(scores))
+
+
