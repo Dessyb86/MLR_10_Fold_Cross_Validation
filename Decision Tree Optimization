@@ -1,0 +1,87 @@
+import pandas as pd
+
+import numpy as np
+
+from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV
+
+from matplotlib import pyplot as plt
+
+import seaborn as sns
+
+import graphviz
+
+import pydotplus
+
+import io
+
+from scipy import misc
+
+from matplotlib.pyplot import imread
+
+import csv
+
+def print_tree(tree,features,path):
+
+    f = io.StringIO()
+
+    export_graphviz(tree,out_file=f,feature_names=features)
+
+    pydotplus.graph_from_dot_data(f.getvalue()).write_png(path)
+
+    img = imread(path)
+
+    plt.rcParams["figure.figsize"]=(20,20)
+
+    plt.imshow(img)
+    
+input_file = '/Users/Dessyb/Dropbox/Thesis_Final_Lap/final_compilation.csv' #name of the input file with the weather data
+
+data = pd.read_csv(input_file)
+
+pbl = data.dropna()
+
+pbl = pbl.drop(columns=['year','month','day','hour','minute','date_time'])
+
+train,test = train_test_split(pbl,test_size = 0.1)
+
+c = DecisionTreeClassifier(min_samples_split=2)
+
+features=["wind_speed","wind_direction","air_temperature","rel_humidity","air_pressure","u_comp","v_comp","zenith_angle","albedo","clear_sky_global_solar_radiation","z_ic"]
+
+x_train = train[features]
+y_train = train['pollution_level']
+
+x_test = test[features]
+y_test = test['pollution_level']
+
+c = DecisionTreeClassifier()
+
+dt = c.fit(x_train,y_train)
+
+sample_split_range = list(range(1, 50))
+
+# Create a parameter grid: map the parameter names to the values that should be searched
+# Simply a python dictionary
+# Key: parameter name
+# Value: list of values that should be searched for that parameter
+# Single key-value pair for param_grid
+param_grid = dict(min_samples_split=sample_split_range)
+
+# instantiate the grid
+grid = GridSearchCV(dt, param_grid, cv=10, scoring='accuracy')
+
+# fit the grid with data
+grid.fit(x_train, y_train)
+
+print(grid.best_score_)
+
+# Dictionary containing the parameters (min_samples_split) used to generate that score
+print(grid.best_params_)
+
+# Actual model object fit with those best parameters
+# Shows default parameters that we did not specify
+print(grid.best_estimator_)
