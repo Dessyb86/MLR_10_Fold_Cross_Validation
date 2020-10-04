@@ -1,0 +1,75 @@
+import pandas as pd
+
+import numpy as np
+
+from sklearn.ensemble import RandomForestClassifier
+
+from sklearn.model_selection import train_test_split
+
+from sklearn.model_selection import KFold
+
+from sklearn.metrics import accuracy_score
+
+import csv
+
+    
+input_file = '/Users/Dessyb/Dropbox/Thesis_Final_Lap/final_compilation.csv' #name of the input file with the weather data
+
+data = pd.read_csv(input_file)
+
+pbl = data.dropna()
+
+pbl = pbl.drop(columns=['year','month','day','hour','minute','date_time'])
+
+features=["wind_speed","wind_direction","air_temperature","rel_humidity","air_pressure","u_comp","v_comp","zenith_angle","albedo","clear_sky_global_solar_radiation","z_ic"]
+
+X = pbl[features]
+
+Y = pbl['pollution_level']
+
+kf = KFold(n_splits = 10, shuffle = True)
+
+c = RandomForestClassifier(n_estimators=10, random_state = 30)
+
+scores = []
+
+signi = []
+
+for i in range(10):
+
+    temp = []
+
+    result = next(kf.split(X), None)
+
+    x_train = X.iloc[result[0]]
+
+    x_test = X.iloc[result[1]]
+
+    y_train = Y.iloc[result[0]]
+
+    y_test = Y.iloc[result[1]]
+
+    rf = c.fit(x_train,y_train)
+
+    importance = c.feature_importances_
+
+    for h,k in enumerate(importance):
+
+        temp.append(k)
+
+    signi.append(temp)
+        
+    predictions = rf.predict(x_test)
+
+    scores.append(rf.score(x_test,y_test))
+
+
+print('Scores from each Iteration within the PBL: ', scores)
+
+print('Average K-Fold Score within the PBL:' , np.mean(scores))
+
+SIGNI = pd.DataFrame(signi)
+
+SIGNI.columns = features
+
+SIGNI.to_csv('feature_importance_rf.csv')
